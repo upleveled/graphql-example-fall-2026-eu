@@ -42,3 +42,5 @@ next-env.d.ts
 
 .eslintcache
 !.env.example
+
+graphql/graphqlGeneratedTypes.ts

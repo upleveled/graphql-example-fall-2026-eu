@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "next build",
-    "dev": "next dev",
+    "build": "pnpm generate && next build",
+    "dev": "concurrently \"next dev\" \"pnpm generate --watch\"",
+    "generate": "graphql-codegen --require tsx/esm",
     "migrate": "ley",
     "start": "next start"
   },
@@ -15,6 +16,7 @@
     "@apollo/server": "5.5.1",
     "@as-integrations/next": "4.1.0",
     "@upleveled/ley": "1.0.0",
+    "dayjs": "1.11.23",
     "dotenv-safe": "9.1.0",
     "graphql": "16.14.2",
     "next": "16.4.1",
@@ -26,12 +28,17 @@
     "zod": "4.6.5"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "7.4.6",
+    "@graphql-codegen/typescript": "6.1.2",
+    "@graphql-codegen/typescript-resolvers": "6.1.1",
+    "@parcel/watcher": "2.6.0",
     "@ts-safeql/eslint-plugin": "^5.4.1",
     "@types/dotenv-safe": "9.1.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "concurrently": "10.0.6",
     "eslint": "^10.12.0",
     "eslint-config-upleveled": "^11.0.1",
     "libpg-query": "^18.1.5",

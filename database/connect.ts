@@ -1,7 +1,9 @@
 // Add the "poison pill" from 'server-only'
 // to prevent using this file in a Client
 // Component
-import 'server-only';
+//
+// Commented out because of GraphQL Code Generator
+// import 'server-only';
 import postgres, { type Sql } from 'postgres';
 import { postgresJsConfig, setEnvironmentVariables } from '../util/config';
 
