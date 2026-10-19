@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import catWithGlasses from '../public/images/cat-with-glasses.jpeg';
 import styles from './page.module.scss';
 
@@ -44,10 +43,6 @@ export default function HomePage() {
         alt="cat with glasses"
         width={300}
       />
-      <h2>
-        <Link href="/cookies-lang-switcher">Cookies Lang Switcher</Link>
-      </h2>
-      A better version of cookies
       <br />
       <br />
       <br />
