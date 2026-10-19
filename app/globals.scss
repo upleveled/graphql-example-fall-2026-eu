@@ -1,0 +1,43 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: rgb(255, 249, 226);
+  font-family: var(--font-geist-sans);
+}
+
+main {
+  padding: 16px;
+}
+
+button {
+  font-size: 0.875rem;
+  border-radius: 5px;
+  border: 1px solid #999;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+}
+
+input,
+textarea {
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #999;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+textarea {
+  min-height: 9rem;
+  resize: vertical;
+}

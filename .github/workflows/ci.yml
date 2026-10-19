@@ -1,0 +1,46 @@
+name: CI
+on: push
+
+jobs:
+  ci:
+    name: Type Checking, Linting
+    runs-on: ubuntu-latest # or macos-latest, windows-latest
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_BASE_URL: http://localhost:3000
+      PGDATABASE: graphql_example
+      PGHOST: localhost
+      PGPASSWORD: graphql_example
+      PGUSERNAME: graphql_example
+    steps:
+      - name: Start preinstalled PostgreSQL on Ubuntu
+        run: |
+          sudo systemctl start postgresql.service
+          pg_isready
+      - name: Create database user
+        run: |
+          sudo -u postgres psql --command="CREATE USER graphql_example PASSWORD 'graphql_example'" --command="\du"
+      - name: Create database and allow user
+        run: |
+          sudo -u postgres createdb --owner=graphql_example graphql_example
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - name: Use Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 'lts/*'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run database migrations
+        run: pnpm migrate up
+      - name: Generate Next.js types for tsc and ESLint
+        run: pnpm next typegen
+      - name: Generate GraphQL types for tsc and ESLint
+        run: pnpm generate
+      - name: Check TypeScript Types
+        run: pnpm tsc
+      - name: Lint with ESLint
+        run: pnpm eslint . --max-warnings 0
+      - name: Lint with Stylelint
+        run: pnpm stylelint '**/*.{css,scss,less,js,tsx}'

@@ -6,25 +6,41 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
+    "migrate": "ley",
     "start": "next start"
   },
   "dependencies": {
+    "@apollo/client": "4.3.3",
+    "@apollo/client-integration-nextjs": "0.14.5",
+    "@apollo/server": "5.5.1",
+    "@as-integrations/next": "4.1.0",
+    "@upleveled/ley": "1.0.0",
+    "dotenv-safe": "9.1.0",
+    "graphql": "16.14.2",
     "next": "16.4.1",
+    "postgres": "3.4.9",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "sass": "1.105.0"
+    "sass": "1.105.0",
+    "server-only": "0.0.1",
+    "zod": "4.6.5"
   },
   "devDependencies": {
+    "@ts-safeql/eslint-plugin": "^5.4.1",
+    "@types/dotenv-safe": "9.1.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^10.12.0",
     "eslint-config-upleveled": "^11.0.1",
+    "libpg-query": "^18.1.5",
     "prettier": "^3.9.10",
+    "prettier-plugin-embed": "^0.7.1",
+    "prettier-plugin-sql": "^0.20.0",
     "stylelint": "^17.16.0",
     "stylelint-config-upleveled": "^2.0.5",
-    "typescript": "^6.0.3"
+    "typescript": "6.0.3"
   },
   "packageManager": "pnpm@12.6.0",
   "devEngines": {
