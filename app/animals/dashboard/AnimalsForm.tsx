@@ -79,7 +79,7 @@ export default function AnimalsForm() {
   const [firstName, setFirstName] = useState('');
   const [type, setType] = useState('');
   const [accessory, setAccessory] = useState('');
-  const [birthDate, setBirthDate] = useState(dayjs().format('YYYY-MM-DD'));
+  const [birthDate, setBirthDate] = useState(() => dayjs().format('YYYY-MM-DD'));
   const [id, setId] = useState('');
 
   const { data } = useSuspenseQuery<{ animals: Animal[] }>(animals);
