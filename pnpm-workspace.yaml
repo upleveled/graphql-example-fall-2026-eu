@@ -1,4 +1,5 @@
 allowBuilds:
+  bcrypt: true
   '@apollo/protobufjs': true
   '@parcel/watcher': true
   sharp: false
