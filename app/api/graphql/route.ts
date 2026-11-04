@@ -5,15 +5,16 @@ import { randomBytes } from 'node:crypto';
 import { ApolloServer } from '@apollo/server';
 import { startServerAndCreateNextHandler } from '@as-integrations/next';
 import bcrypt from 'bcrypt';
-import { GraphQLError } from 'graphql';
+import type postgres from 'postgres';
+import { GraphQLError } from 'graphql/error';
 import { cookies } from 'next/headers';
 import type { NextRequest } from 'next/server';
 import {
   createAnimal,
+  deleteAnimal,
   getAnimalInsecure,
   getAnimalsInsecure,
   updateAnimal,
-  deleteAnimal,
 } from '@/database/animals.ts';
 import { createNote } from '@/database/notes.ts';
 import { createSessionInsecure, getValidSession } from '@/database/sessions.ts';
@@ -60,31 +61,14 @@ const typeDefs = `#graphql
   }
 
   type Mutation {
-    createAnimal(
-      firstName: String!
-      type: String!
-      accessory: String
-      birthDate: String!
-    ): Animal
-    updateAnimal(
-      id: ID!
-      firstName: String!
-      type: String!
-      accessory: String
-      birthDate: String!
-    ): Animal
+    createAnimal(firstName: String!, type: String!, accessory: String, birthDate: String!): Animal,
+    updateAnimal(id: ID!, firstName: String!, type: String!, accessory: String, birthDate: String!): Animal,
     deleteAnimal(id: ID!): Animal
     register(username: String!, password: String!): User
     login(username: String!, password: String!): User
     createNote(title: String!, textContent: String!): Note
   }
 `;
-
-export const schema = typeDefs;
-
-export type Context = {
-  sessionToken?: string;
-};
 
 async function getSessionTokenOrThrow(context: Context) {
   if (!context.sessionToken || !(await getValidSession(context.sessionToken))) {
@@ -112,7 +96,7 @@ const resolvers: Resolvers = {
         animal: {
           firstName: args.firstName,
           type: args.type,
-          accessory: args.accessory ?? null,
+          accessory: args.accessory || null,
           birthDate: args.birthDate,
         },
       });
@@ -135,7 +119,7 @@ const resolvers: Resolvers = {
         animal: {
           firstName: args.firstName,
           type: args.type,
-          accessory: args.accessory ?? null,
+          accessory: args.accessory || null,
           birthDate: args.birthDate,
         },
       });
@@ -144,28 +128,42 @@ const resolvers: Resolvers = {
         throw new GraphQLError(getCombinedErrorMessage(result.error.issues));
       }
 
-      const animal = await updateAnimal(sessionToken, {
+      const animal = await getAnimalInsecure(Number(args.id));
+      if (!animal) {
+        throw new GraphQLError('Animal not found');
+      }
+
+      const updatedAnimal = await updateAnimal(sessionToken, {
         id: Number(args.id),
         ...result.data.animal,
       });
 
-      if (!animal) {
+      if (!updatedAnimal) {
         throw new GraphQLError('Unauthorized operation');
       }
 
-      return postgresToGraphql(animal);
+      return postgresToGraphql(updatedAnimal);
     },
     deleteAnimal: async (parent, args, context) => {
       const sessionToken = await getSessionTokenOrThrow(context);
-      const animal = await deleteAnimal(sessionToken, {
+      if (typeof args.id !== 'string') {
+        throw new GraphQLError('Required field missing');
+      }
+
+      const animal = await getAnimalInsecure(Number(args.id));
+      if (!animal) {
+        throw new GraphQLError('Animal not found');
+      }
+
+      const deletedAnimal = await deleteAnimal(sessionToken, {
         id: Number(args.id),
       });
 
-      if (!animal) {
+      if (!deletedAnimal) {
         throw new GraphQLError('Unauthorized operation');
       }
 
-      return postgresToGraphql(animal);
+      return postgresToGraphql(deletedAnimal);
     },
     register: async (parent, args) => {
       const result = userSchemaRegister.safeParse({
@@ -190,7 +188,7 @@ const resolvers: Resolvers = {
       );
 
       if (!user) {
-        throw new GraphQLError('Registration failed');
+        throw new GraphQLError('Username already taken');
       }
 
       const session = await createSessionInsecure(
@@ -277,19 +275,35 @@ const resolvers: Resolvers = {
         throw new GraphQLError(getCombinedErrorMessage(result.error.issues));
       }
 
-      const note = await createNote(
-        sessionToken,
-        result.data.note.title,
-        result.data.note.textContent,
-      );
+      try {
+        const note = await createNote(
+          sessionToken,
+          result.data.note.title,
+          result.data.note.textContent,
+        );
 
-      if (!note) {
-        throw new GraphQLError('Unauthorized operation');
+        if (!note) {
+          throw new GraphQLError('Unauthorized operation');
+        }
+
+        return postgresToGraphql(note);
+      } catch (error) {
+        const databaseError = error as postgres.PostgresError;
+        if (
+          databaseError.code === '23505' &&
+          databaseError.constraint_name === 'notes_title_key'
+        ) {
+          throw new GraphQLError('Note title already exists');
+        }
+        throw error;
       }
-
-      return postgresToGraphql(note);
     },
   },
+};
+
+export const schema = typeDefs;
+export type Context = {
+  sessionToken?: string;
 };
 
 const apolloServer = new ApolloServer<Context>({ typeDefs, resolvers });

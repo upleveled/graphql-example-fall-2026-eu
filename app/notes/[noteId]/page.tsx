@@ -8,7 +8,7 @@ export default async function NotePage(props: PageProps<'/notes/[noteId]'>) {
   const params = await props.params;
   const noteId = Number(params.noteId);
 
-  if (!Number.isInteger(noteId) || noteId < 1) {
+  if (!Number.isInteger(noteId) || noteId < 1 || noteId > 2147483647) {
     notFound();
   }
 

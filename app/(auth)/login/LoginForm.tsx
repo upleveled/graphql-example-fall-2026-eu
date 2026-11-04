@@ -27,6 +27,7 @@ export default function LoginForm(props: Props) {
   const router = useRouter();
 
   const [login, { loading }] = useMutation(loginMutation, {
+    errorPolicy: 'all',
     variables: {
       username,
       password,

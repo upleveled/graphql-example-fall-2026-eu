@@ -93,6 +93,7 @@ export default function AnimalsForm() {
   }
 
   const [createAnimal] = useMutation(createAnimalMutation, {
+    errorPolicy: 'all',
     variables: {
       firstName,
       type,
@@ -113,6 +114,7 @@ export default function AnimalsForm() {
   });
 
   const [updateAnimal] = useMutation(updateAnimalMutation, {
+    errorPolicy: 'all',
     variables: {
       id,
       firstName,
@@ -134,6 +136,7 @@ export default function AnimalsForm() {
   });
 
   const [deleteAnimal] = useMutation(deleteAnimalMutation, {
+    errorPolicy: 'all',
     onError: (apolloError) => {
       setErrorMessage(apolloError.message);
     },

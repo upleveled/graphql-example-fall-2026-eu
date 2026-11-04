@@ -7,7 +7,7 @@ import RouterRefreshButton from './RouterRefreshButton.tsx';
 
 export default async function Header() {
   const sessionToken = await getCookie('sessionToken');
-  const user = sessionToken ? await getUser(sessionToken) : undefined;
+  const user = !!sessionToken && (await getUser(sessionToken));
 
   return (
     <header className={styles.header}>

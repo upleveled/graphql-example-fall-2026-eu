@@ -31,6 +31,7 @@ export default function NotesForm(props: Props) {
   const router = useRouter();
 
   const [createNote, { loading }] = useMutation(createNoteMutation, {
+    errorPolicy: 'all',
     variables: {
       title,
       textContent,

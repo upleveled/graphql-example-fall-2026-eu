@@ -26,6 +26,79 @@ import { sql } from './connect.ts';
 //   animals.find((currentAnimal) => { return currentAnimal.id
 //     === id; }); return animal; }
 
+// Secure database query functions below, with
+// verification of session token
+
+export const createAnimal = cache(
+  async (sessionToken: Session['token'], newAnimal: Omit<Animal, 'id'>) => {
+    const [animal] = await sql<Animal[]>`
+      INSERT INTO
+        animals (
+          first_name,
+          type,
+          accessory,
+          birth_date
+        )
+      SELECT
+        ${newAnimal.firstName},
+        ${newAnimal.type},
+        ${newAnimal.accessory},
+        ${newAnimal.birthDate}
+      FROM
+        sessions
+      WHERE
+        sessions.token = ${sessionToken}
+        AND sessions.expiry_timestamp > now()
+      RETURNING
+        animals.*
+    `;
+    return animal;
+  },
+);
+
+export const updateAnimal = cache(
+  async (sessionToken: Session['token'], updatedAnimal: Animal) => {
+    const [animal] = await sql<Animal[]>`
+      UPDATE animals
+      SET
+        first_name = ${updatedAnimal.firstName},
+        type = ${updatedAnimal.type},
+        accessory = ${updatedAnimal.accessory},
+        birth_date = ${updatedAnimal.birthDate}
+      FROM
+        sessions
+      WHERE
+        animals.id = ${updatedAnimal.id}
+        AND sessions.token = ${sessionToken}
+        AND sessions.expiry_timestamp > now()
+      RETURNING
+        animals.*
+    `;
+    return animal;
+  },
+);
+
+export const deleteAnimal = cache(
+  async (
+    sessionToken: Session['token'],
+    animalToDelete: Pick<Animal, 'id'>,
+  ) => {
+    const [animal] = await sql<Animal[]>`
+      DELETE FROM animals USING sessions
+      WHERE
+        animals.id = ${animalToDelete.id}
+        AND sessions.token = ${sessionToken}
+        AND sessions.expiry_timestamp > now()
+      RETURNING
+        animals.*
+    `;
+    return animal;
+  },
+);
+
+// Insecure database query functions below, without
+// verification of session token
+
 export const getAnimalsInsecure = cache(async () => {
   const animals = await sql<Animal[]>`
     SELECT
@@ -96,75 +169,6 @@ export const deleteAnimalInsecure = cache(
       DELETE FROM animals
       WHERE
         id = ${animalToDelete.id}
-      RETURNING
-        animals.*
-    `;
-    return animal;
-  },
-);
-
-// Secure database query functions below, with verification of session token
-
-export const createAnimal = cache(
-  async (sessionToken: Session['token'], newAnimal: Omit<Animal, 'id'>) => {
-    const [animal] = await sql<Animal[]>`
-      INSERT INTO
-        animals (
-          first_name,
-          type,
-          accessory,
-          birth_date
-        )
-      SELECT
-        ${newAnimal.firstName},
-        ${newAnimal.type},
-        ${newAnimal.accessory},
-        ${newAnimal.birthDate}
-      FROM
-        sessions
-      WHERE
-        sessions.token = ${sessionToken}
-        AND sessions.expiry_timestamp > now()
-      RETURNING
-        animals.*
-    `;
-    return animal;
-  },
-);
-
-export const updateAnimal = cache(
-  async (sessionToken: Session['token'], updatedAnimal: Animal) => {
-    const [animal] = await sql<Animal[]>`
-      UPDATE animals
-      SET
-        first_name = ${updatedAnimal.firstName},
-        type = ${updatedAnimal.type},
-        accessory = ${updatedAnimal.accessory},
-        birth_date = ${updatedAnimal.birthDate}
-      FROM
-        sessions
-      WHERE
-        animals.id = ${updatedAnimal.id}
-        AND sessions.token = ${sessionToken}
-        AND sessions.expiry_timestamp > now()
-      RETURNING
-        animals.*
-    `;
-    return animal;
-  },
-);
-
-export const deleteAnimal = cache(
-  async (
-    sessionToken: Session['token'],
-    animalToDelete: Pick<Animal, 'id'>,
-  ) => {
-    const [animal] = await sql<Animal[]>`
-      DELETE FROM animals USING sessions
-      WHERE
-        animals.id = ${animalToDelete.id}
-        AND sessions.token = ${sessionToken}
-        AND sessions.expiry_timestamp > now()
       RETURNING
         animals.*
     `;

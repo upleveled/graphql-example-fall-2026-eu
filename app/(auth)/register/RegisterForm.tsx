@@ -27,6 +27,7 @@ export default function RegisterForm(props: Props) {
   const router = useRouter();
 
   const [register, { loading }] = useMutation(registerMutation, {
+    errorPolicy: 'all',
     variables: {
       username,
       password,

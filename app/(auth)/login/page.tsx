@@ -10,9 +10,7 @@ export const metadata = {
 
 export default async function LoginPage(props: PageProps<'/login'>) {
   const sessionToken = await getCookie('sessionToken');
-  const session = sessionToken
-    ? await getValidSession(sessionToken)
-    : undefined;
+  const session = !!sessionToken && (await getValidSession(sessionToken));
 
   if (session) {
     redirect('/');

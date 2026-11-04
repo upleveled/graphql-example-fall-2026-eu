@@ -11,7 +11,7 @@ export const metadata = {
 
 export default async function NotesPage() {
   const sessionToken = await getCookie('sessionToken');
-  const user = sessionToken ? await getUser(sessionToken) : undefined;
+  const user = !!sessionToken && (await getUser(sessionToken));
 
   if (!user || !sessionToken) {
     redirect('/login?returnTo=/notes');
