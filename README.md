@@ -8,15 +8,6 @@ This example is part of the curriculum for the [UpLeveled Full Stack Web Develop
 
 ![Screenshot of animals dashboard, showing a list of animals and a form to edit them](./screenshot-dashboard.avif)
 
-## Features
-
-- Register and log in with a username and hashed password
-- Keep users logged in with expiring sessions and HTTP-only cookies
-- Log out by deleting the session and cookie
-- Require authentication for animal writes and the animals dashboard
-- Create private notes and restrict access to their owners
-- Return users to the requested page after login
-
 ## Technologies
 
 - [Next.js](https://nextjs.org/)
