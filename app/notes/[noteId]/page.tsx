@@ -20,24 +20,24 @@ export default async function NotePage(props: PageProps<'/notes/[noteId]'>) {
 
   const note = await getNote(sessionToken, noteId);
 
-  if (note) {
+  if (!note) {
+    if (!(await selectNoteExists(sessionToken, noteId))) {
+      notFound();
+    }
+
     return (
       <div>
-        <h1>{note.title}</h1>
-        <p>{note.textContent}</p>
+        <h1>Access denied</h1>
+        <p>You do not have permission to access this note.</p>
         <Link href="/notes">Back to notes</Link>
       </div>
     );
   }
 
-  if (!(await selectNoteExists(sessionToken, noteId))) {
-    notFound();
-  }
-
   return (
     <div>
-      <h1>Access denied</h1>
-      <p>You do not have permission to access this note.</p>
+      <h1>{note.title}</h1>
+      <p>{note.textContent}</p>
       <Link href="/notes">Back to notes</Link>
     </div>
   );
