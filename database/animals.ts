@@ -4,8 +4,9 @@
 // Commented out because of GraphQL Code Generator
 // import 'server-only';
 import { cache } from 'react';
-import type { Animal } from '../migrations/00000-createTableAnimals';
-import { sql } from './connect';
+import type { Session } from '../migrations/00003-createTableSessions.ts';
+import type { Animal } from '../migrations/00000-createTableAnimals.ts';
+import { sql } from './connect.ts';
 
 // const animals = [ { id: 1, firstName: 'Mochi', type: 'red
 //   panda', accessory: 'tiny yellow raincoat', birthDate: new
@@ -24,6 +25,79 @@ import { sql } from './connect';
 // export function getAnimal(id) { const animal =
 //   animals.find((currentAnimal) => { return currentAnimal.id
 //     === id; }); return animal; }
+
+// Secure database query functions below, with
+// verification of session token
+
+export const createAnimal = cache(
+  async (sessionToken: Session['token'], newAnimal: Omit<Animal, 'id'>) => {
+    const [animal] = await sql<Animal[]>`
+      INSERT INTO
+        animals (
+          first_name,
+          type,
+          accessory,
+          birth_date
+        )
+      SELECT
+        ${newAnimal.firstName},
+        ${newAnimal.type},
+        ${newAnimal.accessory},
+        ${newAnimal.birthDate}
+      FROM
+        sessions
+      WHERE
+        sessions.token = ${sessionToken}
+        AND sessions.expiry_timestamp > now()
+      RETURNING
+        animals.*
+    `;
+    return animal;
+  },
+);
+
+export const updateAnimal = cache(
+  async (sessionToken: Session['token'], updatedAnimal: Animal) => {
+    const [animal] = await sql<Animal[]>`
+      UPDATE animals
+      SET
+        first_name = ${updatedAnimal.firstName},
+        type = ${updatedAnimal.type},
+        accessory = ${updatedAnimal.accessory},
+        birth_date = ${updatedAnimal.birthDate}
+      FROM
+        sessions
+      WHERE
+        animals.id = ${updatedAnimal.id}
+        AND sessions.token = ${sessionToken}
+        AND sessions.expiry_timestamp > now()
+      RETURNING
+        animals.*
+    `;
+    return animal;
+  },
+);
+
+export const deleteAnimal = cache(
+  async (
+    sessionToken: Session['token'],
+    animalToDelete: Pick<Animal, 'id'>,
+  ) => {
+    const [animal] = await sql<Animal[]>`
+      DELETE FROM animals USING sessions
+      WHERE
+        animals.id = ${animalToDelete.id}
+        AND sessions.token = ${sessionToken}
+        AND sessions.expiry_timestamp > now()
+      RETURNING
+        animals.*
+    `;
+    return animal;
+  },
+);
+
+// Insecure database query functions below, without
+// verification of session token
 
 export const getAnimalsInsecure = cache(async () => {
   const animals = await sql<Animal[]>`
