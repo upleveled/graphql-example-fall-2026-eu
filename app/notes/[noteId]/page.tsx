@@ -20,11 +20,11 @@ export default async function NotePage(props: PageProps<'/notes/[noteId]'>) {
 
   const note = await getNote(sessionToken, noteId);
 
-  if (!note) {
-    if (!(await selectNoteExists(sessionToken, noteId))) {
-      notFound();
-    }
+  if (!note && !(await selectNoteExists(sessionToken, noteId))) {
+    notFound();
+  }
 
+  if (!note) {
     return (
       <div>
         <h1>Access denied</h1>
