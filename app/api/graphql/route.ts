@@ -5,7 +5,6 @@ import { randomBytes } from 'node:crypto';
 import { ApolloServer } from '@apollo/server';
 import { startServerAndCreateNextHandler } from '@as-integrations/next';
 import bcrypt from 'bcrypt';
-import type postgres from 'postgres';
 import { GraphQLError } from 'graphql/error';
 import { cookies } from 'next/headers';
 import type { NextRequest } from 'next/server';
@@ -275,28 +274,17 @@ const resolvers: Resolvers = {
         throw new GraphQLError(getCombinedErrorMessage(result.error.issues));
       }
 
-      try {
-        const note = await createNote(
-          sessionToken,
-          result.data.note.title,
-          result.data.note.textContent,
-        );
+      const note = await createNote(
+        sessionToken,
+        result.data.note.title,
+        result.data.note.textContent,
+      );
 
-        if (!note) {
-          throw new GraphQLError('Unauthorized operation');
-        }
-
-        return postgresToGraphql(note);
-      } catch (error) {
-        const databaseError = error as postgres.PostgresError;
-        if (
-          databaseError.code === '23505' &&
-          databaseError.constraint_name === 'notes_title_key'
-        ) {
-          throw new GraphQLError('Note title already exists');
-        }
-        throw error;
+      if (!note) {
+        throw new GraphQLError('Unauthorized operation');
       }
+
+      return postgresToGraphql(note);
     },
   },
 };
