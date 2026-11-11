@@ -44,7 +44,13 @@ const resolvers: Resolvers = {
       return animals.map((animal) => postgresToGraphql(animal));
     },
     animal: async (parent, args) => {
-      const animal = await getAnimalInsecure(Number(args.id));
+      const animalId = Number(args.id);
+
+      if (isNaN(animalId)) {
+        throw new GraphQLError('Invalid animal id');
+      }
+
+      const animal = await getAnimalInsecure(animalId);
       return postgresToGraphql(animal);
     },
   },
@@ -70,6 +76,12 @@ const resolvers: Resolvers = {
       return postgresToGraphql(animal);
     },
     updateAnimal: async (parent, args) => {
+      const animalId = Number(args.id);
+
+      if (isNaN(animalId)) {
+        throw new GraphQLError('Invalid animal id');
+      }
+
       // FIXME: Use Zod or other data validation library
       if (
         typeof args.id !== 'string' ||
@@ -82,13 +94,13 @@ const resolvers: Resolvers = {
         throw new GraphQLError('Required field missing');
       }
 
-      const animal = await getAnimalInsecure(Number(args.id));
+      const animal = await getAnimalInsecure(animalId);
       if (!animal) {
         throw new GraphQLError('Animal not found');
       }
 
       const updatedAnimal = await updateAnimalInsecure({
-        id: Number(args.id),
+        id: animalId,
         firstName: args.firstName,
         type: args.type,
         accessory: args.accessory || null,
@@ -98,17 +110,19 @@ const resolvers: Resolvers = {
       return postgresToGraphql(updatedAnimal);
     },
     deleteAnimal: async (parent, args) => {
-      if (typeof args.id !== 'string') {
-        throw new GraphQLError('Required field missing');
+      const animalId = Number(args.id);
+
+      if (isNaN(animalId)) {
+        throw new GraphQLError('Invalid animal id');
       }
 
-      const animal = await getAnimalInsecure(Number(args.id));
+      const animal = await getAnimalInsecure(animalId);
       if (!animal) {
         throw new GraphQLError('Animal not found');
       }
 
       const deletedAnimal = await deleteAnimalInsecure({
-        id: Number(args.id),
+        id: animalId,
       });
 
       return postgresToGraphql(deletedAnimal);
