@@ -131,7 +131,6 @@ const resolvers: Resolvers = {
   },
 };
 
-export const schema = typeDefs;
 export type Context = Record<string, unknown>;
 
 const apolloServer = new ApolloServer({ typeDefs, resolvers });
