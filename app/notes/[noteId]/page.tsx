@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getValidSession } from '../../../database/sessions.ts';
 import { notFound, redirect } from 'next/navigation';
-import { getNote, selectNoteExists } from '../../../database/notes.ts';
+import { getNote, getNoteExistsInsecure } from '../../../database/notes.ts';
 import { getCookie } from '../../../util/cookies.ts';
 
 export default async function NotePage(props: PageProps<'/notes/[noteId]'>) {
@@ -20,14 +20,14 @@ export default async function NotePage(props: PageProps<'/notes/[noteId]'>) {
 
   const note = await getNote(sessionToken, noteId);
 
-  if (!note && !(await selectNoteExists(sessionToken, noteId))) {
+  if (!note && !(await getNoteExistsInsecure(noteId))) {
     notFound();
   }
 
   // Security: This can be an antipattern for security, because of "information
   // exposure": it tells the user that a note with this id exists. Instead,
   // consider showing only the 404 Not Found page in both cases
-  // (replace access denied message with notFound(), remove selectNoteExists()).
+  // (replace access denied message with notFound(), remove getNoteExistsInsecure()).
   if (!note) {
     return (
       <div>
