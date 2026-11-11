@@ -84,7 +84,13 @@ const resolvers: Resolvers = {
       return animals.map((animal) => postgresToGraphql(animal));
     },
     animal: async (parent, args) => {
-      const animal = await getAnimalInsecure(Number(args.id));
+      const animalId = Number(args.id);
+
+      if (isNaN(animalId)) {
+        throw new GraphQLError('Invalid animal id');
+      }
+
+      const animal = await getAnimalInsecure(animalId);
       return postgresToGraphql(animal);
     },
   },
@@ -113,6 +119,12 @@ const resolvers: Resolvers = {
       return postgresToGraphql(animal);
     },
     updateAnimal: async (parent, args, context) => {
+      const animalId = Number(args.id);
+
+      if (isNaN(animalId)) {
+        throw new GraphQLError('Invalid animal id');
+      }
+
       const sessionToken = await getSessionTokenOrThrow(context);
       const result = animalSchema.safeParse({
         animal: {
@@ -127,13 +139,13 @@ const resolvers: Resolvers = {
         throw new GraphQLError(getCombinedErrorMessage(result.error.issues));
       }
 
-      const animal = await getAnimalInsecure(Number(args.id));
+      const animal = await getAnimalInsecure(animalId);
       if (!animal) {
         throw new GraphQLError('Animal not found');
       }
 
       const updatedAnimal = await updateAnimal(sessionToken, {
-        id: Number(args.id),
+        id: animalId,
         ...result.data.animal,
       });
 
@@ -144,18 +156,20 @@ const resolvers: Resolvers = {
       return postgresToGraphql(updatedAnimal);
     },
     deleteAnimal: async (parent, args, context) => {
-      const sessionToken = await getSessionTokenOrThrow(context);
-      if (typeof args.id !== 'string') {
-        throw new GraphQLError('Required field missing');
+      const animalId = Number(args.id);
+
+      if (isNaN(animalId)) {
+        throw new GraphQLError('Invalid animal id');
       }
 
-      const animal = await getAnimalInsecure(Number(args.id));
+      const sessionToken = await getSessionTokenOrThrow(context);
+      const animal = await getAnimalInsecure(animalId);
       if (!animal) {
         throw new GraphQLError('Animal not found');
       }
 
       const deletedAnimal = await deleteAnimal(sessionToken, {
-        id: Number(args.id),
+        id: animalId,
       });
 
       if (!deletedAnimal) {
