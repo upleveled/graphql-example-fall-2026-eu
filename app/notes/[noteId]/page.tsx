@@ -24,6 +24,10 @@ export default async function NotePage(props: PageProps<'/notes/[noteId]'>) {
     notFound();
   }
 
+  // Security: This can be an antipattern for security, because of "information
+  // exposure": it tells the user that a note with this id exists. Instead,
+  // consider showing only the 404 Not Found page in both cases
+  // (replace access denied message with notFound(), remove selectNoteExists()).
   if (!note) {
     return (
       <div>
