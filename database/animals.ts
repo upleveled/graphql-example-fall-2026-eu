@@ -1,8 +1,6 @@
 // Simulate a real database, which cannot be imported from Client
 // Components
-//
-// Commented out because of GraphQL Code Generator
-// import 'server-only';
+import 'server-only';
 import { cache } from 'react';
 import type { Animal } from '../migrations/00000-createTableAnimals';
 import { sql } from './connect';
