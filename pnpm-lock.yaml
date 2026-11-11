@@ -190,6 +190,9 @@ importers:
       graphql:
         specifier: 16.14.2
         version: 16.14.2
+      graphql-tag:
+        specifier: 2.12.7
+        version: 2.12.7(graphql@16.14.2)
       next:
         specifier: 16.4.1
         version: 16.4.1(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@20.19.43)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.105.0)

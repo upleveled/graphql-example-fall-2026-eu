@@ -19,6 +19,7 @@
     "dayjs": "1.11.23",
     "dotenv-safe": "9.1.0",
     "graphql": "16.14.2",
+    "graphql-tag": "2.12.7",
     "next": "16.4.1",
     "postgres": "3.4.9",
     "react": "19.3.0",

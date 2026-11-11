@@ -4,6 +4,7 @@
 import { ApolloServer } from '@apollo/server';
 import { startServerAndCreateNextHandler } from '@as-integrations/next';
 import { GraphQLError } from 'graphql/error';
+import gql from 'graphql-tag';
 import type { NextRequest } from 'next/server';
 import {
   createAnimalInsecure,
@@ -16,7 +17,7 @@ import type { Resolvers } from '@/graphql/graphqlGeneratedTypes';
 import { postgresToGraphql } from '@/graphql/transform';
 
 // your data
-const typeDefs = `#graphql
+const typeDefs = gql`
   type Animal {
     id: ID!
     firstName: String!
